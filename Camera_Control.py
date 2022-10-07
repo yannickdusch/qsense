@@ -1,3 +1,6 @@
+# CAMERA : Hamamatsu Orca-Flash4.0 V3 (C13440-20CU)
+#   link : https://www.hamamatsu.com/eu/en/product/cameras/cmos-cameras/C13440-20CU.html
+
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
