@@ -1,5 +1,3 @@
-# Shell : exec(open(r"C:\Users\adminlocal\Desktop\hamamatsu_python\Commande_ORCA_Flash.py").read())
-
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
