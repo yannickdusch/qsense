@@ -1,3 +1,10 @@
+# GENERATOR : Agilent E4438C
+#   Type : ESG
+#   Communication :
+#	    LAN (10BASE-T ; 100BASE-T Ethernet) [prot. VXI-11, Sockets, TELNET, FTP]
+#		GPIB
+#		RS-232 
+
 import pyvisa
 
 rm = pyvisa.ResourceManager()
