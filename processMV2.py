@@ -1,3 +1,5 @@
+# This file works together with the dataMV2 Arduino files
+
 import serial
 import math as m
 
