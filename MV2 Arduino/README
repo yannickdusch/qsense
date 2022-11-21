@@ -1,0 +1,3 @@
+The dataMV2 files allow to receive continuously all the data (3 components of magnetic field plus temperature) from the MV2 sensor.
+
+The triggerMV2 files allow to ask for a specific value (single x, y, z axis or three axis). The sensor waits for a command to transmit (once) the desired data.
