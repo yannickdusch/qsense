@@ -53,7 +53,7 @@ def GetSphericalCoord(field) :
     else :
         phi = m.acos(Bx/((Bx**2+By**2)**0.5))*By/abs(By) + m.pi*(1 - By/abs(By))
     coord = [B,theta,phi]
-    print("Field direction : θ = "+str(theta/m.pi)+"π | φ = "+str(phi/m.pi)+"π")
+    print("Field : B = "+str(round(B,2))+" mT | θ = "+str(round(theta/m.pi,2))+"π | φ = "+str(round(phi/m.pi,2))+"π")
     return(coord)
 
 def ProcessField(port) :
