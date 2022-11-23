@@ -7,7 +7,7 @@ ref = '32816,32817,32562,17971'  # Values returned by the sensor away from any s
 MV2range = 240  # Converts pin values in mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
 alpha = m.pi/4  # Angle between the axis of the sensor and those of the electromagnet
 
-def extract(port) :
+def extract(port) :  # Gets raw data from the sensor (returns pin values)
     ser = serial.Serial()
     ser.port = port
     ser.baudrate = 115200
@@ -25,14 +25,14 @@ def extract(port) :
     ser.close()
     return(MV2data)
 
-def RawToField(MV2data) :
+def RawToField(MV2data) :  # Converts pin values to mT by calculating the difference with ref values and dividing with MV2range
     data0 = ref.split(',')
     MV2field = []
     for i in range(len(data0)-1) :
         MV2field += [(float(MV2data[i])-float(data0[i]))/MV2range]
     return MV2field
 
-def ChangeBase(MV2field) :
+def ChangeBase(MV2field) :  # Changes base by using the projection of the sensor axis on those of the electromagnet
     Bx, By, Bz = MV2field[0], MV2field[1], MV2field[2]
     BX = m.cos(alpha)*Bx - m.sin(alpha)*By
     BY = -m.sin(alpha)*Bx - m.cos(alpha)*By
@@ -40,7 +40,7 @@ def ChangeBase(MV2field) :
     field = [BX,BY,BZ]
     return field
 
-def GetSphericalCoord(field) :
+def GetSphericalCoord(field) :  # Calculates the spherical coordinates
     Bx, By, Bz = field[0], field[1], field[2]
     B = (Bx**2 + By**2 + Bz**2)**0.5
     if B == 0 :
@@ -58,7 +58,7 @@ def GetSphericalCoord(field) :
     print("Field : B = "+str(round(B,2))+" mT | θ = "+str(round(theta/m.pi,2))+"π | φ = "+str(round(phi/m.pi,2))+"π")
     return(coord)
 
-def ProcessField(port) :
+def ProcessField(port) :  # All of the above at once
     MV2data = extract(port)
     MV2field = RawToField(MV2data)
     field = ChangeBase(MV2field)
