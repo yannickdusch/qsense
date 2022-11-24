@@ -137,6 +137,7 @@ uint16_t A_Digitize_To() {
 }
 
 void RawValues() {
+  Serial.print("_");
   Serial.print(X);
   Serial.print(",");
   Serial.print(Y);
@@ -144,6 +145,7 @@ void RawValues() {
   Serial.print(Z);
   Serial.print(",");
   Serial.print(T);
+  Serial.print("_");
   Serial.println("");
 }
 
