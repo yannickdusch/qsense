@@ -1,11 +1,14 @@
-# This file works together with the dataMV2 Arduino files
-
 import serial
+import time
 import math as m
+import cv2  # after having installed opencv-python
+import numpy as np
 
 ref = '32816,32817,32562,17971'  # Values returned by the sensor away from any source of magnetic field (in digital mode)
-MV2range = 240  # Converts pin values in mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
+MV2range = 240  # Converts pin values to mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
 alpha = m.pi/4  # Angle between the axis of the sensor and those of the electromagnet
+height, width = 256, 256  # Shape of the window displaying the data
+col = 200  # Color of the window displaying the data (0 <=> black | 255 <=> white)
 
 def extract(port) :  # Gets raw data from the sensor (returns pin values)
     ser = serial.Serial()
@@ -16,11 +19,12 @@ def extract(port) :  # Gets raw data from the sensor (returns pin values)
     ser.open()
     while c == 0 :
         lines = ser.readlines()
-        if (len(lines) > 0) and (len(lines[0]) == len(ref)) :
+        if (len(lines) > 0) :
             line = lines[0].decode().strip('\n\r')
-            if line[17] == ',' :
-                MV2data = line.split(',')
-                c += 1
+            if len(line) > 8 :
+                if (line[0] == '_') and (line[-1] == '_') :
+                    MV2data = line[1:-1].split(',')
+                    c += 1
     print('finished')
     ser.close()
     return(MV2data)
@@ -44,7 +48,7 @@ def GetSphericalCoord(field) :  # Calculates the spherical coordinates
     Bx, By, Bz = field[0], field[1], field[2]
     B = (Bx**2 + By**2 + Bz**2)**0.5
     if B == 0 :
-        print("No Field")
+        # print("No Field")
         return [0,0,0]
     theta = m.acos(Bz/B)
     if By == 0 :
@@ -55,7 +59,7 @@ def GetSphericalCoord(field) :  # Calculates the spherical coordinates
     else :
         phi = m.acos(Bx/((Bx**2+By**2)**0.5))*By/abs(By) + m.pi*(1 - By/abs(By))
     coord = [B,theta,phi]
-    print("Field : B = "+str(round(B,2))+" mT | θ = "+str(round(theta/m.pi,2))+"π | φ = "+str(round(phi/m.pi,2))+"π")
+    # print("Field : B = "+str(round(B,2))+" mT | θ = "+str(round(theta/m.pi,2))+"π | φ = "+str(round(phi/m.pi,2))+"π")
     return(coord)
 
 def ProcessField(port) :  # All of the above at once
@@ -64,3 +68,43 @@ def ProcessField(port) :  # All of the above at once
     field = ChangeBase(MV2field)
     coord = GetSphericalCoord(field)
     return(coord)
+
+def displayMF(port) :  # Display the live data in a separate window
+    print('Press q to exit..')
+    ser = serial.Serial()
+    ser.port = port
+    ser.baudrate = 115200
+    ser.timeout = 0
+    c = ['B = ','th = ','ph = ']   # PIL module could display special characters : θ, φ and π
+    u = [' mT','pi','pi']
+    font = cv2.FONT_HERSHEY_DUPLEX
+    fontScale = 0.8
+    color = (0,0,0)
+    thickness = 1
+    ser.open()
+    while True :
+        lines = ser.readlines()
+        if (len(lines) > 0) :
+            line = lines[0].decode().strip('\n\r')
+            if len(line) > 8 :
+                if (line[0] == '_') and (line[-1] == '_') :
+                    MV2data = line[1:-1].split(',')
+                    MV2field = RawToField(MV2data)
+                    field = ChangeBase(MV2field)
+                    coord = GetSphericalCoord(field)
+                    bckground = np.zeros((height,width,3), np.uint8)
+                    bckground[:,:] = (col,col,col)
+                    for k in range(3) :
+                        if k == 0 :
+                            text = c[k]+str(round(coord[k],2))+u[k]
+                        else :
+                            text = c[k]+str(round(coord[k]/m.pi,2))+u[k]
+                        coordinates = (int(width/6),int((k+1)*height/4))
+                        imgdata = cv2.putText(bckground, text, coordinates, font, fontScale, color, thickness, cv2.LINE_AA)
+                        cv2.imshow("Field", imgdata)
+        time.sleep(0.1)
+        if cv2.waitKey(1) & 0xFF == ord('q') :
+            break
+    print('exit')
+    cv2.destroyAllWindows()
+    ser.close()
