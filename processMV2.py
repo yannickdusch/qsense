@@ -49,7 +49,7 @@ def GetSphericalCoord(field) :  # Calculates the spherical coordinates
     B = (Bx**2 + By**2 + Bz**2)**0.5
     if B == 0 :
         # print("No Field")
-        return [0,0,0]
+        return [0.0,0.0,0.0]
     theta = m.acos(Bz/B)
     if By == 0 :
         if Bx < 0 :
@@ -69,18 +69,47 @@ def ProcessField(port) :  # All of the above at once
     coord = GetSphericalCoord(field)
     return(coord)
 
-def displayMF(port) :  # Display the live data in a separate window
+def newbckground() :
+    bckground = np.zeros((height,width,3), np.uint8)
+    bckground[:,:] = (col,col,col)
+    for k in range(3) :
+        a = int(height/12)
+        i = a-1 + 4*a*k
+        bckground[i:i+2*a+1,a-1] = (0,0,0)
+        bckground[i:i+2*a+2,-a] = (0,0,0)
+        bckground[i,a-1:-a] = (0,0,0)
+        bckground[i+2*a+1,a-1:-a] = (0,0,0)
+        bckground[i+1:i+2*a,a:-(a+1)] = (col+20,col+20,col+20)
+        bckground[i+1:i+2*a+1,a] = (150,150,150)
+        bckground[i+1,a:-a] = (150,150,150)
+        bckground[i+1:i+2*a+1,-(a+1)] = (150,150,150)
+        bckground[i+2*a,a:-a] = (150,150,150)
+    return bckground
+
+def displaytext(bckground, data) :  # Prints text on the given background
+    c = ['B = ','th = ','ph = ']   # PIL module could display special characters : θ, φ and π
+    u = [' mT','pi','pi']
+    font = cv2.FONT_HERSHEY_PLAIN
+    fontScale = 1.4
+    color = (0,0,0)
+    thickness = 1
+    a = int(height/12)
+    for k in range(3) :
+        if k == 0 :
+            val = str(round(data[k],2))
+        else :
+            val = str(round(data[k]/m.pi,2))
+        text = c[k]+val+u[k]
+        coordinates = (int(4*a/3),int(5*a/2+4*a*k))
+        imgdata = cv2.putText(bckground, text, coordinates, font, fontScale, color, thickness, cv2.LINE_AA)
+    return imgdata
+
+def displayMF(port) :  # Displays the live data in a separate window
     print('Press q to exit..')
     ser = serial.Serial()
     ser.port = port
     ser.baudrate = 115200
     ser.timeout = 0
-    c = ['B = ','th = ','ph = ']   # PIL module could display special characters : θ, φ and π
-    u = [' mT','pi','pi']
-    font = cv2.FONT_HERSHEY_DUPLEX
-    fontScale = 0.8
-    color = (0,0,0)
-    thickness = 1
     ser.open()
     while True :
         lines = ser.readlines()
@@ -92,17 +121,10 @@ def displayMF(port) :  # Display the live data in a separate window
                     MV2field = RawToField(MV2data)
                     field = ChangeBase(MV2field)
                     coord = GetSphericalCoord(field)
-                    bckground = np.zeros((height,width,3), np.uint8)
-                    bckground[:,:] = (col,col,col)
-                    for k in range(3) :
-                        if k == 0 :
-                            text = c[k]+str(round(coord[k],2))+u[k]
-                        else :
-                            text = c[k]+str(round(coord[k]/m.pi,2))+u[k]
-                        coordinates = (int(width/6),int((k+1)*height/4))
-                        imgdata = cv2.putText(bckground, text, coordinates, font, fontScale, color, thickness, cv2.LINE_AA)
-                        cv2.imshow("Field", imgdata)
-        time.sleep(0.1)
+                    bckground = newbckground()
+                    imgdata = displaytext(bckground,coord)
+                    cv2.imshow("Field", imgdata)
+        time.sleep(0.05)
         if cv2.waitKey(1) & 0xFF == ord('q') :
             break
     print('exit')
