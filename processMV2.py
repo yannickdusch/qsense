@@ -5,6 +5,7 @@ import cv2  # after having installed opencv-python
 import numpy as np
 
 ref = '32816,32817,32562,17971'  # Values returned by the sensor away from any source of magnetic field (in digital mode)
+#ref ='32608,32976,32768,14464'  # Ref values for A mode
 MV2range = 240  # Converts pin values to mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
 alpha = m.pi/4  # Angle between the axis of the sensor and those of the electromagnet
 height, width = 256, 256  # Shape of the window displaying the data
