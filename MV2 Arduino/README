@@ -1,3 +1,59 @@
 The dataMV2 files allow to receive continuously all the data (3 components of magnetic field plus temperature) from the MV2 sensor.
 
-The triggerMV2 files allow to ask for a specific value (single x, y, z axis or three axis). The sensor waits for a command to transmit (once) the desired data.
+The triggerMV2 files allow to ask for a specific value (single x, y, z axis or three axis).
+The sensor waits for a command to transmit (once) the desired data.
+
+
+SENSOR SETUP AND COMMANDS :
+
+Registers setup :
+
+  SetReg00 = 0b 11101100 00110000;
+  SetReg01 = 0b 11101101 00000010;
+  SetReg10 = 0b 11101110 00001000;
+
+  X_request = 0b 11101100 00110000;
+  Y_request = 0b 11101100 00110001;
+  Z_request = 0b 11101100 00110010;
+
+  X_readout = 0b 11011100 00110000;
+  Y_readout = 0b 11011100 00110001;
+  Z_readout = 0b 11011100 00110010;
+
+
+Note: when changing the range, or when changing the axis in single axis mode, the user should wait until the value is stable.
+The required delay corresponds to the ADC refresh rate: from 0.375 kHz to 3 kHz, depending on the resolution chosen. (=> delay(10))
+(cf. MV2 Datasheet)
+
+Commands for data readout :
+
+  Only X (single axis mode) : MA = 01
+
+  sX_request = 0b 11101100 01 110000;
+  sX_readout = 0b 11011100 01 110000;
+
+  Only Y (single axis mode) : MA = 10
+
+  sY_request = 0b 11101100 10 110001;
+  sY_readout = 0b 11011100 10 110001;
+
+  Only Z (single axis mode) : MA = 11
+
+  sZ_request = 0b 11101100 11 110010;
+  sZ_readout = 0b 11011100 11 110010;
+
+  Three axis mode : MA = 00
+
+  X_request = 0b 11101100 00 110000;
+  X_readout = 0b 11011100 00 110000;
+
+  Y_request = 0b 11101100 00 110001;
+  Y_readout = 0b 11011100 00 110001;
+
+  Z_request = 0b 11101100 00 110010;
+  Z_readout = 0b 11011100 00 110010;
+
+
+Note: by eliminating switching noise, the single-axis modes provide improved resolution.
+However, switching between single-axis modes (e.g. acquiring successive blocks of data with MA = 01, 10, 11, 01, 10, 11, ...), has been observed to cause small jump-discontinuities on each of the axes.
+The cause for this behavior is TBD (cf. MV2 Datasheet).
