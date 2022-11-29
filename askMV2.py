@@ -18,7 +18,6 @@ def AskMV2(port) :
     ser.baudrate = 115200
     ser.timeout = 0
     cmd = ''
-    firstAnalog = False
     ser.open()
     while 1 : 
         init = ser.readline()
@@ -34,8 +33,7 @@ def AskMV2(port) :
         line = ser.readline()
         data = line.decode().strip('\n\r')
         if (cmd == 'a') :
-            AD = 1
-            if firstAnalog == False :
+            if (AD == 0) :  # It seems that we need to reset the analog ref each time we change mode
                 ser.close()
                 aref = SetAnalogRef(port,10)
                 print('Set ref for Analog mode :')
@@ -46,7 +44,7 @@ def AskMV2(port) :
                     time.sleep(0.05)
                     if len(init) > 0 :
                         break
-                firstAnalog = True
+            AD = 1
         else :
             AD = 0
         if (cmd == 'x') :
