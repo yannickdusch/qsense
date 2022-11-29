@@ -1,3 +1,5 @@
+# This file works together with the dataMV2.ino file
+
 import serial
 import time
 import math as m
