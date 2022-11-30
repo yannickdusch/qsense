@@ -57,3 +57,14 @@ Commands for data readout :
 Note: by eliminating switching noise, the single-axis modes provide improved resolution.
 However, switching between single-axis modes (e.g. acquiring successive blocks of data with MA = 01, 10, 11, 01, 10, 11, ...), has been observed to cause small jump-discontinuities on each of the axes.
 The cause for this behavior is TBD (cf. MV2 Datasheet).
+
+
+CONVERSION FACTORS (cf. MV2 Datasheet):
+
+  Digital Mode (0.1 T range):
+    X/Y axes: 260 (min) | 267 (typ) | 278 (max) LSB/mT
+    Z axis: 280 (min) | 289 (typ) | 302 (max) LSB/mT
+
+  Analog Mode VCC 5V (0.1 T range):
+    X/Y axes: 18.12 (min) | 18.18 (typ) | 19.16 (max) V/T
+    Z axis: 20.67 (min) | 20.73 (typ) | 20.93 (max) V/T
