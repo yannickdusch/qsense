@@ -11,14 +11,30 @@ rm = pyvisa.ResourceManager()
 device = rm.open_resource('TCPIP::169.254.243.104::INSTR')
 print('Detected : '+device.query("*IDN?")+'Alias : device')
 
-#Demander la fréquence : device.query("FREQ?")
+#Ask for frequency : device.query("FREQ?")
 
-def set_sweep(start = "1GHZ", stop = "4GHZ", amp = "-136DBM") :
-    device.write("FREQ "+start+";POW "+amp)
+def set_sweep(center = "3GHZ", span = "1GHZ", dwell = "100 ms", amp = "-136DBM") :
+    device.write("POW -136DBM")
+    device.write("SOUR:FREQ:MODE SWEEP")
+    device.write("SOUR:FREQ:CENTER "+center)
+    device.write("SOUR:FREQ:SPAN "+span)
+    device.write("SOUR:SWEEP:DWELL "+dwell)
+    
 
 class Sweep :
-    startfreq = "1GHZ"
-    stopfreq = "4GHZ"
-    startamp = "-136DBM"
-    stopamp = "-136DBM"
-        
+    
+    def __init__(self, center = "3GHZ", span = "1GHZ", dwell = "100 ms", amp = "-136DBM") :
+        self.c = center
+        self.s = span
+        self.d = dwell
+        self.a = amp
+    
+    def set_sweep(self) :
+        device.write("POW -136DBM")
+        device.write("SOUR:FREQ:MODE SWEEP")
+        device.write("SOUR:FREQ:CENTER "+self.c)
+        device.write("SOUR:FREQ:SPAN "+self.s)
+        device.write("SOUR:SWEEP:DWELL "+self.d)
+    
+    # def run() :
+    #     device.write("SOUR:SWEEP:EXECUTE")
