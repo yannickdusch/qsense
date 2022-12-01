@@ -68,3 +68,8 @@ CONVERSION FACTORS (cf. MV2 Datasheet):
   Analog Mode VCC 5V (0.1 T range):
     X/Y axes: 18.12 (min) | 18.18 (typ) | 19.16 (max) V/T
     Z axis: 20.67 (min) | 20.73 (typ) | 20.93 (max) V/T
+
+Note : The digital output is an unsigned 16-bit integer value.
+When the MagVector MV2 is exposed to a magnetic field, the output value is proportional to the field up to the field range (100 mT, 300 mT, 1 T or 3 T), with a proportionality constant being the sensitivity parameter.
+At zero magnetic field, the output would ideally be half the maximum value, 2^15 = 32768; in reality, the value will correspond to the sensor offset.
+The ADC saturates at a field roughly 20% larger than the range (cf. MV2 Datasheet).
