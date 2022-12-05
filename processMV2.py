@@ -127,7 +127,7 @@ def displayMF(port) :  # Displays the live data in a separate window
                     bckground = newbckground()
                     imgdata = displaytext(bckground,coord)
                     cv2.imshow("Field", imgdata)
-        time.sleep(0.05)
+        time.sleep(0.02)
         if cv2.waitKey(1) & 0xFF == ord('q') :
             break
     print('exit')
