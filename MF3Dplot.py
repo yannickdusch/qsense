@@ -1,4 +1,8 @@
-# To activate 3D animation: Tools > Preferences > IPython Console > Graphics > Backend and change it from "Inline" to "Automatic".
+# This file allows to plot the field as a live vector in a 3D window.
+
+# /!\ This version does not include a closing of the serial communication.
+
+# To activate 3D animation in Spyder: Tools > Preferences > IPython Console > Graphics > Backend and change it from "Inline" to "Automatic".
 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
