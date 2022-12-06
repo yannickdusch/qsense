@@ -1,3 +1,5 @@
+# This file works together with the dataMV2.ino file.
+
 # This file allows to plot the field as a live vector in a 3D window.
 
 # /!\ This version does not include a closing of the serial communication.
