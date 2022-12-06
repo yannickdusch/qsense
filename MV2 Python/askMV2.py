@@ -8,7 +8,8 @@ fref = '32816,32817,32562'  # Values returned by the sensor away from any source
 xref = '32880'  # X value returned by the sensor away from any source of magnetic field (in single axis digital mode)
 yref = '32945'  # Y value returned by the sensor away from any source of magnetic field (in single axis digital mode)
 zref = '32754'  # Z value returned by the sensor away from any source of magnetic field (in single axis digital mode)
-MV2range = 240  # Converts pin values in mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
+sens_x, sens_y, sens_z = 267, 267, 289  # Values of sensitivity (in LSB/mT) given by the MV2 datasheet (p. 16)
+MV2sens = [sens_x, sens_y, sens_z]  # Converts pin values to mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
 alpha = m.pi/4  # Angle between the axis of the sensor and those of the electromagnet
 
 def AskMV2(port) :
@@ -49,33 +50,33 @@ def AskMV2(port) :
             AD = 0
         if (cmd == 'x') :
             if (AD == 0) :
-                Bx = round((float(data)-float(xref))/MV2range,2)
+                Bx = round((float(data)-float(xref))/sens_x,2)
             elif (AD == 1) :
-                Bx = round((float(data)-aref[0])/MV2range,2)
+                Bx = round((float(data)-aref[0])/sens_x,2)
             print('Bx = '+str(Bx)+' mT')
         elif (cmd == 'y') :
             if (AD == 0) :
-                By = round((float(data)-float(yref))/MV2range,2)
+                By = round((float(data)-float(yref))/sens_y,2)
             elif (AD == 1) :
-                By = round((float(data)-aref[1])/MV2range,2)            
+                By = round((float(data)-aref[1])/sens_y,2)            
             print('By = '+str(By)+' mT')
         elif (cmd == 'z') :
             if (AD == 0) :
-                Bz = round((float(data)-float(zref))/MV2range,2)
+                Bz = round((float(data)-float(zref))/sens_z,2)
             elif (AD == 1) :
-                Bz = round((float(data)-aref[2])/MV2range,2)
+                Bz = round((float(data)-aref[2])/sens_z,2)
             print('Bz = '+str(Bz)+' mT')
         elif (cmd == 'f') :
             field = data.split(',')
             refield = fref.split(',')
             if (AD == 0) :
-                Bx = round((float(field[0])-float(refield[0]))/MV2range,2)
-                By = round((float(field[1])-float(refield[1]))/MV2range,2)
-                Bz = round((float(field[2])-float(refield[2]))/MV2range,2)
+                Bx = round((float(field[0])-float(refield[0]))/sens_x,2)
+                By = round((float(field[1])-float(refield[1]))/sens_y,2)
+                Bz = round((float(field[2])-float(refield[2]))/sens_z,2)
             elif (AD == 1) :
-                Bx = round((float(field[0])-aref[3][0])/MV2range,2)
-                By = round((float(field[1])-aref[3][1])/MV2range,2)
-                Bz = round((float(field[2])-aref[3][2])/MV2range,2)
+                Bx = round((float(field[0])-aref[3][0])/sens_x,2)
+                By = round((float(field[1])-aref[3][1])/sens_y,2)
+                Bz = round((float(field[2])-aref[3][2])/sens_z,2)
             print('Bx = '+str(Bx)+' mT')
             print('By = '+str(By)+' mT')
             print('Bz = '+str(Bz)+' mT')
