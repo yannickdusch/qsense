@@ -8,7 +8,8 @@ import numpy as np
 
 ref = '32816,32817,32562,17971'  # Values returned by the sensor away from any source of magnetic field (in digital mode)
 #ref ='32608,32976,32768,14464'  # Ref values for A mode
-MV2range = 240  # Converts pin values to mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
+sens_x, sens_y, sens_z = 267, 267, 289  # Values of sensitivity (in LSB/mT) given by the MV2 datasheet (p. 16)
+MV2sens = [sens_x, sens_y, sens_z]  # Converts pin values to mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
 alpha = m.pi/4  # Angle between the axis of the sensor and those of the electromagnet
 height, width = 256, 256  # Shape of the window displaying the data
 col = 200  # Color of the window displaying the data (0 <=> black | 255 <=> white)
@@ -32,11 +33,11 @@ def extract(port) :  # Gets raw data from the sensor (returns pin values)
     ser.close()
     return(MV2data)
 
-def RawToField(MV2data) :  # Converts pin values to mT by calculating the difference with ref values and dividing with MV2range
+def RawToField(MV2data) :  # Converts pin values to mT by calculating the difference with ref values and dividing by MV2sens
     data0 = ref.split(',')
     MV2field = []
     for i in range(len(data0)-1) :
-        MV2field += [(float(MV2data[i])-float(data0[i]))/MV2range]
+        MV2field += [(float(MV2data[i])-float(data0[i]))/MV2sens[i]]
     return MV2field
 
 def ChangeBase(MV2field) :  # Changes base by using the projection of the sensor axis on those of the electromagnet
