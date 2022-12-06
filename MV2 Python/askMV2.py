@@ -1,4 +1,4 @@
-# This file works together with the triggerMV2.ino file
+# This file works together with the triggerMV2.ino file.
 
 import serial
 import time
