@@ -32,6 +32,24 @@ def ChangeBase(MV2field) :  # Changes base by using the projection of the sensor
     field = [BX,BY,BZ]
     return field
 
+def GetSphericalCoord(field) :  # Calculates the spherical coordinates
+    Bx, By, Bz = field[0], field[1], field[2]
+    B = (Bx**2 + By**2 + Bz**2)**0.5
+    if B == 0 :
+        # print("No Field")
+        return [0.0,0.0,0.0]
+    theta = m.acos(Bz/B)
+    if By == 0 :
+        if Bx < 0 :
+            phi = m.pi
+        else :
+            phi = 0
+    else :
+        phi = m.acos(Bx/((Bx**2+By**2)**0.5))*By/abs(By) + m.pi*(1 - By/abs(By))
+    coord = [B,theta,phi]
+    # print("Field : B = "+str(round(B,2))+" mT | θ = "+str(round(theta/m.pi,2))+"π | φ = "+str(round(phi/m.pi,2))+"π")
+    return(coord)
+
 class MF3D :  # Real time 3D plot of the magnetic field vector
     
     def __init__(self, port = 'COM3', multi = False) :  # 'multi = True' activates the multiplotting (3D and 2D spherical angles)
@@ -75,7 +93,7 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
         self.ax.set_xlim([-50,50])
         self.ax.set_ylim([-50,50])
         self.ax.set_zlim([-50,50])
-        self.ax.set_title("3D Magnetic Field")
+        self.ax.set_title("3D Magnetic Field : B = "+str(self.B)+" mT | θ = "+str(self.theta)+"π | φ = "+str(self.phi)+"π")
         self.ax.quiver(start[0],start[1],start[2],10,0,0,color = 'b')
         self.ax.quiver(start[0],start[1],start[2],0,10,0,color = 'k')
         self.ax.quiver(start[0],start[1],start[2],0,0,10,color = 'k')
@@ -96,9 +114,9 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
         self.ax3.set_thetalim([0,m.pi])
         self.ax3.set_theta_zero_location("N")  # Put 0° on the right
         self.ax3.set_theta_direction(-1)  # Set clockwise direction
-        self.ax1.set_title("3D Magnetic Field")
-        self.ax2.set_title("Spherical φ")
-        self.ax3.set_title("Spherical θ")
+        self.ax1.set_title("3D Magnetic Field | B = "+str(self.B)+" mT")
+        self.ax2.set_title("Spherical φ = "+str(self.phi)+"π")
+        self.ax3.set_title("Spherical θ = "+str(self.theta)+"π")
         self.ax1.quiver(start[0],start[1],start[2],10,0,0,color = 'b')  # X axis
         self.ax1.quiver(start[0],start[1],start[2],0,10,0,color = 'k')  # Y axis
         self.ax1.quiver(start[0],start[1],start[2],0,0,10,color = 'k')  # Z axis
@@ -122,6 +140,8 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
                     MV2data = line[1:-1].split(',')
                     MV2field = RawToField(MV2data)
                     field = ChangeBase(MV2field)
+                    spheric = GetSphericalCoord(field)
+                    self.B, self.theta, self.phi = round(spheric[0],2), round(spheric[1]/m.pi,2), round(spheric[2]/m.pi,2)
                     if self.multi :
                         self.MFmultiplot(field)
                     else :
