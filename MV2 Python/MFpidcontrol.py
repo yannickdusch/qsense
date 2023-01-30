@@ -1,3 +1,6 @@
+# /!\ THIS FILE IS INCOMPLETE. IT MUST STILL SEND THE CALCULATED CURRENT VALUES TO A GENERATOR.
+# /!\ THE PID CONSTANTS HAVE TO BE SET.
+
 import math as m
 import serial
 from matplotlib.animation import FuncAnimation
