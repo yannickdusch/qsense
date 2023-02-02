@@ -8,10 +8,15 @@
 # Elle communique avec pico.py pour la gestion interne au picoscope
 #
 
+import datetime
+import os
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from .subscripts.pico import Picoscope
 from ..theme import frame
 from nicegui import app, ui
+from nicegui.events import ClickEventArguments
 
 
 def create_pico_ui():
@@ -261,16 +266,74 @@ def create_pico_ui():
                             range = pico.ranges[channel]
                             plt.legend(loc="upper left")
                             plt.ylim([-range, range])
-
+            
             # Routine de mise à jour des graphes, toutes les secondes
             data_update = ui.timer(1, do_data_update, active=False)
+
+            #############
+            # Exportation
+            #############
+
+            # Permet d'exporter le graphe d'un channel donnée dans le format donné
+            def export_plot(e: ClickEventArguments):
+                if channels_grid.active:
+
+                    export_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../exports/'))
+                    time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") #date actuelle pour différencier les fichiers
+                    channel = export_menus_list[e.sender.id][0] # On récupère le channel correspondant
+                    export_type = export_menus_list[e.sender.id][1]
+                    export_links = export_menus_list[e.sender.id][2]
+
+                    if (export_type == 'png'): # Exportation PNG
+                        exported_file_name = time + "__pico_exported_plot_" + channel + ".png" # nom du fichier
+                        file_to_export = os.path.normpath(export_dir + "/" + exported_file_name) # chemin du fichier
+                        with channel_plots[channel]:
+                            plt.savefig(file_to_export) # exportation en png du plot
+
+                    elif (export_type == 'tpng'): # Exportation PNG Transparent
+                        exported_file_name = time + "__pico_exported_plot_" + channel + ".png" # nom du fichier
+                        file_to_export = os.path.normpath(export_dir + "/" + exported_file_name) # chemin du fichier
+                        with channel_plots[channel]:
+                            plt.savefig(file_to_export, transparent=True) # exportation en png transparent du plot
+
+                    else : # Exportation CSV
+                        exported_file_name = time + "__pico_exported_plot_" + channel + ".csv" # nom du fichier
+                        file_to_export = os.path.normpath(export_dir + "/" + exported_file_name) # chemin du fichier
+                        with channel_plots[channel]:
+                            ax = plt.gca() # On récupère les données du plot
+                            line = ax.lines[0]
+                            data = line.get_data()
+
+                        data_file_str = ""  # Construction du fichier csv
+                        data_file_str += "Temps (s) ;"
+                        for x in data[0]:
+                            data_file_str += (str(x) + ";")
+                        data_file_str += ("\nChannel " + channel + "(V);")
+                        for y in data[1]:
+                            data_file_str += (str(y) + ";")
+
+                        data_file = open(file_to_export, 'x') # Ecriture du fichier
+                        data_file.write(data_file_str)
+                        data_file.close()
+
+                    # Affichage d'un lien vers le fichier exporté (ui.open() ne permet pas d'ouvrir dans un nouvel onglet, et ferme la page pico)
+                    export_links.clear()
+                    with export_links:
+                        ui.link("Fichier exporté : {}".format(exported_file_name), "/exports/" + exported_file_name, new_tab=True).props('target=_blank')
+
+
 
             ###################################
             # Création du layout de l'interface
             ###################################
 
             with ui.column():
-                with ui.row(): # Partie haute (Init, Acqui, Gen)
+
+                ###
+                # Partie haute (Init, Acqui, Gen)
+                ###
+
+                with ui.row(): 
                     with ui.card(): # Initialisation du picoscope
                         ui.label("Initialisation").classes("text-h6")
                         with ui.row():
@@ -303,9 +366,13 @@ def create_pico_ui():
                             frequency_number = ui.number(label="Fréquence (Hz)", value=1, format="%.2f", on_change=set_signal_frequency)
                     disable(sig_generator)
 
-
                 with ui.column() as channels_grid:
-                    with ui.row().classes("items-center"): # Première ligne (channels A et B)
+
+                    ###
+                    # Première ligne (channels A et B)
+                    ###
+
+                    with ui.row().classes("items-center"): 
 
                         # Channel A
                         with ui.column():
@@ -318,9 +385,19 @@ def create_pico_ui():
                                 with ui.row():
                                     channelA_active = ui.checkbox("Channel A",value=False,on_change=update_active_channels) # Permet d'activer/désactiver la récupération de données depuis ce channel
                                     switch_modeA = ui.switch("Mode AC", on_change=update_modes) # Permet d'activer/désactiver le couplage AC (sinon, DC)
+                                
                                 ui.label("Range :")
                                 rangeA_toggle = ui.toggle(options={20: "20V", 10: "10V", 5: "5V", 2: "2V", 1: "1V", 0.500:"500mV", 0.200:"200mV",0.100:"100mV",0.050:"50mV",0.020:"20mV",0.010:"10mV"}, value=20,on_change=update_ranges).props("no-caps")
-                            disable(rangeA_toggle)
+                                disable(rangeA_toggle)
+                                with ui.menu() as export_A:
+                                    export_A_png = ui.menu_item('PNG',  export_plot)
+                                    export_A_tpng = ui.menu_item('Transparent PNG', export_plot)
+                                    export_A_csv = ui.menu_item('CSV', export_plot)
+                                    ui.separator()
+                                    ui.menu_item('Retour', export_A.close)
+                                ui.button('Exporter le graphe', on_click=export_A.open)
+                                with ui.column() as channelA_export_links:
+                                    pass
 
                         # Channel B
                         with ui.column():
@@ -335,9 +412,22 @@ def create_pico_ui():
                                     switch_modeB = ui.switch("Mode AC", on_change=update_modes)
                                 ui.label("Range :")
                                 rangeB_toggle = ui.toggle(options={20: "20V", 10: "10V", 5: "5V", 2: "2V", 1: "1V", 0.500:"500mV", 0.200:"200mV",0.100:"100mV",0.050:"50mV",0.020:"20mV",0.010:"10mV"}, value=20,on_change=update_ranges).props("no-caps")
-                            disable(rangeB_toggle)
+                                disable(rangeB_toggle)
+                                with ui.menu() as export_B:
+                                    export_B_png = ui.menu_item('PNG',  export_plot)
+                                    export_B_tpng = ui.menu_item('Transparent PNG', export_plot)
+                                    export_B_csv = ui.menu_item('CSV', export_plot)
+                                    ui.separator()
+                                    ui.menu_item('Retour', export_B.close)
+                                ui.button('Exporter le graphe', on_click=export_B.open)
+                                with ui.column() as channelB_export_links:
+                                    pass
+                    
+                    ###
+                    # Deuxième ligne (Channels C et D)
+                    ###
 
-                    with ui.row().classes("items-center"): # Deuxième ligne (Channels C et D)
+                    with ui.row().classes("items-center"): 
 
                         # Channel C
                         with ui.column():
@@ -352,7 +442,16 @@ def create_pico_ui():
                                     switch_modeC = ui.switch("Mode AC", on_change=update_modes)
                                 ui.label("Range :")
                                 rangeC_toggle = ui.toggle(options={20: "20V", 10: "10V", 5: "5V", 2: "2V", 1: "1V", 0.500:"500mV", 0.200:"200mV",0.100:"100mV",0.050:"50mV",0.020:"20mV",0.010:"10mV"}, value=20,on_change=update_ranges).props("no-caps")
-                            disable(rangeC_toggle)
+                                disable(rangeC_toggle)
+                                with ui.menu() as export_C:
+                                    export_C_png = ui.menu_item('PNG',  export_plot)
+                                    export_C_tpng = ui.menu_item('Transparent PNG', export_plot)
+                                    export_C_csv = ui.menu_item('CSV', export_plot)
+                                    ui.separator()
+                                    ui.menu_item('Retour', export_C.close)
+                                ui.button('Exporter le graphe', on_click=export_C.open)
+                                with ui.column() as channelC_export_links:
+                                    pass
 
                         # Channel D
                         with ui.column():
@@ -367,16 +466,33 @@ def create_pico_ui():
                                     switch_modeD = ui.switch("Mode AC", on_change=update_modes)
                                 ui.label("Range :")
                                 rangeD_toggle = ui.toggle(options={20: "20V", 10: "10V", 5: "5V", 2: "2V", 1: "1V", 0.500:"500mV", 0.200:"200mV",0.100:"100mV",0.050:"50mV",0.020:"20mV",0.010:"10mV"}, value=20,on_change=update_ranges).props("no-caps")
-                            disable(rangeD_toggle)
+                                disable(rangeD_toggle)
+                                with ui.menu() as export_D:
+                                    export_D_png = ui.menu_item('PNG',  export_plot)
+                                    export_D_tpng = ui.menu_item('Transparent PNG', export_plot)
+                                    export_D_csv = ui.menu_item('CSV', export_plot)
+                                    ui.separator()
+                                    ui.menu_item('Retour', export_D.close)
+                                ui.button('Exporter le graphe', on_click=export_D.open)
+                                with ui.column() as channelD_export_links:
+                                    pass
+                disable(channels_grid) # Interface channels désactivée par défaut
+
+            #######################################
+            # Divers utilitaires pour l'UI
+            #######################################
 
                 # On stocke les différents éléments dans des dictionnaires pour pouvoir y accéder par itération et éviter de répéter 4x le même code pour chaque channel
-                channel_plots = {'A' : channelA_plot,'B' : channelB_plot, 'C' : channelC_plot,'D' : channelD_plot}
-                channel_plots_color = {'A' : "b-",'B' : "r-",'C' : "g-",'D' : "g-"}
-                channel_actives = {'A' : channelA_active,'B' : channelB_active,'C' : channelC_active,'D' : channelD_active}
-                channel_switch_modes = {'A' : switch_modeA,'B' : switch_modeB,'C' : switch_modeC,'D' : switch_modeD}
-                channel_range_toggles = {'A' : rangeA_toggle,'B': rangeB_toggle,'C' : rangeC_toggle,'D' : rangeD_toggle}
-
-                disable(channels_grid) # Interface channels désactivée par défaut
+                channel_plots = {'A' : channelA_plot,'B' : channelB_plot, 'C' : channelC_plot,'D' : channelD_plot} # Pour accéder aux plots
+                channel_plots_color = {'A' : "b-",'B' : "r-",'C' : "g-",'D' : "g-"} # Pour accéder aux couleurs de chaque channel
+                channel_actives = {'A' : channelA_active,'B' : channelB_active,'C' : channelC_active,'D' : channelD_active} # Pour accéder aux checkboxs d'activation des channels
+                channel_switch_modes = {'A' : switch_modeA,'B' : switch_modeB,'C' : switch_modeC,'D' : switch_modeD} # Pour accéder aux switchs d'activation du mode AC
+                channel_range_toggles = {'A' : rangeA_toggle,'B': rangeB_toggle,'C' : rangeC_toggle,'D' : rangeD_toggle} # Pour accéder aux toggles de choix des échelles de tension
+                export_menus_list = { # Pour accéder, grâce à l'ID du bouton activé, au channel, type d'exportation, et où afficher le lien du fichier, pour chaque exportation de chaque channel
+                    export_A_png.id : ('A', 'png', channelA_export_links), export_A_tpng.id : ('A', 'tpng', channelA_export_links), export_A_csv.id : ('A', 'csv', channelA_export_links),
+                    export_B_png.id : ('B', 'png', channelB_export_links), export_B_tpng.id : ('B', 'tpng', channelB_export_links), export_B_csv.id : ('B', 'csv', channelB_export_links),
+                    export_C_png.id : ('C', 'png', channelC_export_links), export_C_tpng.id : ('C', 'tpng', channelC_export_links), export_C_csv.id : ('C', 'csv', channelC_export_links),
+                    export_D_png.id : ('D', 'png', channelD_export_links), export_D_tpng.id : ('D', 'tpng', channelD_export_links), export_D_csv.id : ('D', 'csv', channelD_export_links) }
 
             # Création d'une popup d'erreur affichant les valeurs de l'objet error, que l'on pourra ensuite afficher avec error_popup
             error = Error()
@@ -389,9 +505,10 @@ def create_pico_ui():
 
             # Lors de la déconnexion de l'utilisateur (page fermée)
             def on_disconnect():
+                print("DISCONNECTED")
                 if disconnect_button.active: 
                     data_update.active = False # On stoppe la collecte de donnée si elle est toujours en cours
-                    pico.ps.stop()
                     pico.ps.close() # Et on ferme le Pico
+
             # On règle l'app pour qu'elle exécute on_disconnect lorsqu'un utilisateur ferme la page, pour libérer la connexion au picoscope
             app.on_disconnect(on_disconnect)
