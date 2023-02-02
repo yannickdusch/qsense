@@ -67,7 +67,7 @@ def create_example_page():
             # Que l'on passe à app :
             app.on_disconnect(on_disconnect)
 ```
-Par exemple, ici, on définit la fonction `on_disconnect`, qui permet de fermer la connexion au picoscope, que l'on passe ensuite à `app.on_disconnect`
+Ici, on définit la fonction `on_disconnect`, qui permet de fermer la connexion au picoscope, que l'on passe ensuite à `app.on_disconnect`
 
 ## Mise à jour de main et menu
 Une fois la page créée, il faut mettre à jour `main.py` pour qu'il prenne en compte la nouvelle page ; pour cela, on importe la fonction `create_example_page()` créée précédemment, et on l'exécute. Par exemple :
