@@ -11,6 +11,7 @@
 import datetime
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from .subscripts.pico import Picoscope
 from ..theme import frame
@@ -253,19 +254,23 @@ def create_pico_ui():
 
             # Récupération des données et mise à jour des graphes
             def do_data_update():
-                data = pico.get_data_block() # Récupération des données du picoscope
-                for channel in ['A', 'B', 'C', 'D']:
-                    if (pico.channels[channel]):
+                global get_data_in_progress
+                if not get_data_in_progress: # On vérifie qu'une acquisition n'est pas déjà en cours (i.e. si jamais la durée d'acquisition est fixée à plus de 1000 ms, on risque d'accumuler les demandes de run block au picoscope et de ralentir considérablement l'UI)
+                    get_data_in_progress = True
+                    data = pico.get_data_block() # Récupération des données du picoscope
+                    for channel in ['A', 'B', 'C', 'D']:
+                        if (pico.channels[channel]):
 
-                        with channel_plots[channel]: # On remet le contexte du plot pour pouvoir le modifier
-                            plt.clf() # On clear le plot
-                            plt.plot(data[channel][0], data[channel][1], channel_plots_color[channel], label="Channel {}".format(channel)) # On retrace les données
-                            
-                            # Mise à jour des axes
-                            range = pico.ranges[channel]
-                            plt.legend(loc="upper left")
-                            plt.ylim([-range, range])
-            
+                            with channel_plots[channel]: # On remet le contexte du plot pour pouvoir le modifier
+                                plt.clf() # On clear le plot
+                                plt.plot(data[channel][0], data[channel][1], channel_plots_color[channel], label="Channel {}".format(channel)) # On retrace les données
+                                
+                                # Mise à jour des axes
+                                range = pico.ranges[channel]
+                                plt.legend(loc="upper left")
+                                plt.ylim([-range, range])
+                    get_data_in_progress = False
+
             # Routine de mise à jour des graphes, toutes les secondes
             data_update = ui.timer(1, do_data_update, active=False)
 
@@ -301,15 +306,13 @@ def create_pico_ui():
                         with channel_plots[channel]:
                             ax = plt.gca() # On récupère les données du plot
                             line = ax.lines[0]
-                            data = line.get_data()
+                            datax = line.get_xdata()
+                            datay = line.get_ydata()
 
                         data_file_str = ""  # Construction du fichier csv
-                        data_file_str += "Temps (s) ;"
-                        for x in data[0]:
-                            data_file_str += (str(x) + ";")
-                        data_file_str += ("\nChannel " + channel + "(V);")
-                        for y in data[1]:
-                            data_file_str += (str(y) + ";")
+                        data_file_str += ("Temps (s) ; Channel " + channel + "(V)\n")
+                        for i in range(len(datax)):
+                            data_file_str += (str(datax[i]) + ";" +str(datay[i]) + "\n")
 
                         data_file = open(file_to_export, 'x') # Ecriture du fichier
                         data_file.write(data_file_str)
@@ -504,7 +507,6 @@ def create_pico_ui():
 
             # Lors de la déconnexion de l'utilisateur (page fermée)
             def on_disconnect():
-                print("DISCONNECTED")
                 if disconnect_button.active: 
                     data_update.active = False # On stoppe la collecte de donnée si elle est toujours en cours
                     pico.ps.close() # Et on ferme le Pico
