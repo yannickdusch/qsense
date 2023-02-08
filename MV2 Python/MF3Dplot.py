@@ -14,7 +14,8 @@ import serial
 ref = '32816,32817,32562,17971'  # Values returned by the sensor away from any source of magnetic field (in digital mode)
 sens_x, sens_y, sens_z = 267, 267, 289  # Values of sensitivity (in LSB/mT) given by the MV2 datasheet (p. 16)
 MV2sens = [sens_x, sens_y, sens_z]  # Converts pin values to mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
-alpha = m.pi/4  # Angle between the axis of the sensor and those of the electromagnet
+#alpha = m.pi/4  # Angle between the axis of the sensor and those of the electromagnet
+alpha = -m.pi/2  # Angle between the axis of the sensor and those of the antenna
 start = [0,0,0]  # Set origin
 
 def RawToField(MV2data) :  # Converts pin values to mT by calculating the difference with ref values and dividing with MV2range
