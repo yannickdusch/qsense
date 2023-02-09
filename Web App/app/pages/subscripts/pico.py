@@ -72,12 +72,16 @@ class Picoscope(object):
 		self.sample_interval = self.ps.getTimestepFromTimebase(temp_timebase) # On récupère l'intervalle exact correspondant avec la lib
 		self.sample_interval, self.nosamples,_ = self.ps.setSamplingInterval(self.sample_interval, self.sample_duration) # On setup l'échantillonage, et on récupère le nombre d'échantillons exact
 	
+	def set_trigger(self,channel, threshold, direction, delay=0,timeout=100, active=True):
+		self.ps.setSimpleTrigger(channel, threshold, direction, delay, timeout, active)
+		
+
 	# Récupération d'un block de données, en supposant que l'initialisation et le setup aient été faits
 	def get_data_block(self):
 		for channel in ['A', 'B', 'C', 'D']:
 			if self.channels[channel]:
-				self.ps.setSimpleTrigger(channel,0.1*self.ranges[channel], "Rising", 0, 100, True)  # On rajoute un trigger montant à 10% du range
-		
+				self.set_trigger(channel, 0.1*self.ranges[channel], 'Rising') # On rajoute un trigger montant à 10% du range
+
 		# On lance le block et on attends que le picoscope soit prêt à le renvoyer
 		self.ps.runBlock()
 		self.ps.waitReady()

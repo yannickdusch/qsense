@@ -43,7 +43,7 @@ La directive `@ui.page('/example')` permet d'indiquer à l'UI que la fonction su
 On rajoute ensuite le thème global à la page (header avec le nom de l'app/menu/titre de page, footer, ...) en important `frame` de `theme.py` ; on indique en argument le titre de page à afficher dans le header, ici, `"Exemple"`.  
   
 On peut enfin rajouter le contenu de la page, ici, un simple label "Page d'exemple".
-Si (et c'est très souvent le cas), la page nécessite des scripts pythons supplémentaires, qui ne sont pas directement liés à l'UI (récupération de données, interfaçage avec d'autres appareils, etc..), on pourra les placer dans le sous-dossier `./pages/subscripts/`
+
 ### Note :
 Si la page nécessite d'établir une connexion à des éléments matériels, celle ci ne sera établie que pour une session de la page, et donc un seul utilisateur. Il faut penser à déconnecter les appareils lorsque l'utilisateur se déconnecte (i.e. ferme la page) (Sinon, la connexion restera établie tant que l'UI ne sera pas redémarrée, et tous les utilisateurs se connectant après le premier n'y auront pas accès). Pour cela, il faut importer `nicegui.app` et passer une fonction à `app.on_disconnect`. Par exemple :
 ```python
@@ -67,7 +67,7 @@ def create_example_page():
             # Que l'on passe à app :
             app.on_disconnect(on_disconnect)
 ```
-Ici, on définit la fonction `on_disconnect`, qui permet de fermer la connexion au picoscope, que l'on passe ensuite à `app.on_disconnect`
+Par exemple, ici, on définit la fonction `on_disconnect`, qui permet de fermer la connexion au picoscope, que l'on passe ensuite à `app.on_disconnect`
 
 ## Mise à jour de main et menu
 Une fois la page créée, il faut mettre à jour `main.py` pour qu'il prenne en compte la nouvelle page ; pour cela, on importe la fonction `create_example_page()` créée précédemment, et on l'exécute. Par exemple :

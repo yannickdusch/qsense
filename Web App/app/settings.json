@@ -1,0 +1,13 @@
+{
+    "pico" : {
+        "plot_update_timer" : 1
+    },
+
+    "odmr" : {
+        "MF3D_serial_number" : "75435353035351B051C0",
+        "MF3D_simple_plot_timer" : 0.5,
+        "MF3D_multi_plot_timer" : 1,
+        "AFG3252_usb_address" : "0x0699::0x0345::C010948",
+        "ODMR_timer" : 1
+    }
+}

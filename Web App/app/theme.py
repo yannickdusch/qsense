@@ -8,15 +8,24 @@
 #
 
 from contextlib import contextmanager
-from .menu import menu
-from nicegui import ui
 
+from fastapi.requests import Request
+from .menu import menu
+from nicegui import ui, app
+from .pages.login import is_authenticated
+from .pages.login import get_username
+from .pages.login import disconnect
 @contextmanager
-def frame(navtitle: str):
+def frame(navtitle: str, request: Request):
     with ui.header().classes('justify-between text-white items-center').style('background-color: #3874c8').props('elevated'):
         ui.link('Qsense Web App', '/').classes(replace='text-white font-bold text-h6')
         ui.label(navtitle).classes("text-h5") # Titre de la page
         with ui.row():
             menu() # Création du menu
-    # TODO footer avec connexion user / déconnexion user / shutdown gui / restart gui
+
+    with ui.footer().classes('justify-end text-white items-center').style('background-color: #3874c8').props('elevated'):
+        if is_authenticated(request):
+            ui.label("Bienvenue, %s |" % get_username(request))
+            ui.button("Se déconnecter", on_click=lambda: disconnect(request))
+            ui.button("Eteindre l'UI", on_click=app.shutdown)
     yield

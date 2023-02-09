@@ -4,6 +4,7 @@
 
 # To activate plot animations in Spyder: Tools > Preferences > IPython Console > Graphics > Backend and change it from "Inline" to "Automatic".
 
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import math as m
@@ -53,15 +54,14 @@ def GetSphericalCoord(field) :  # Calculates the spherical coordinates
 
 class MF3D :  # Real time 3D plot of the magnetic field vector
     
-    def __init__(self, fig, multi = False) :  # 'multi = True' activates the multiplotting (3D and 2D spherical angles)
+    def __init__(self, fig:Figure, serial_number,multi = False) :  # 'multi = True' activates the multiplotting (3D and 2D spherical angles)
         
         # Détection du port serial :
         port = 'COM1'
         ports = serial.tools.list_ports.comports()
         for p in ports :
-            if p.serial_number == '75435353035351B051C0':
+            if p.serial_number == serial_number:
                 port = p.name
-
         self.multi = multi
         self.ser = serial.Serial()
         self.ser.port = port
@@ -89,7 +89,7 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
             self.ax3.grid(True)
         else :
             self.fig = fig
-            self.fig.set_size_inches((5,5), forward=True)
+            self.fig.set_size_inches((5,7), forward=True)
             plt.figure(fig.number)
             self.ax = plt.axes(projection = '3d')
             self.ax.set_xlim([-50,50])
@@ -161,3 +161,4 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
     
     def close(self) :
         self.ser.close()
+        self.fig.clear()
