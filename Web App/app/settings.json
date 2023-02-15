@@ -1,6 +1,15 @@
 {
+    "login" : {
+        "login_required" : true,
+        "admin_pass_hash" : "5610a824f546dfafacb3658ca03d3ce4dbf3b1f8856136c1464b02f273194515"
+    },
+
     "pico" : {
         "plot_update_timer" : 1
+    },
+
+    "pulse": {
+        "pulse_core_freq" : 500
     },
 
     "odmr" : {

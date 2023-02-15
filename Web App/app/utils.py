@@ -1,8 +1,11 @@
-from nicegui import ui
+#########################################
+#  QSense | utils.py
+#########################################
+#
+# Ce fichier contient quelques classes/fonctions utilitaires utilisées dans la plupart des pages
+#
 
-#################################
-# Classes/Fonctions utilitaires :
-#################################
+from nicegui import ui
 
 # Permet de stocker une erreur et un popup qui lui correspondant, pour le faire apparaître si nécessaire
 class Error():
@@ -21,7 +24,7 @@ class Error():
         self.label_error.set_text(str(error))
         self.popup.open()
 
-# Marquer un objet comme "désactivé" (classe Quasar "disabled" + booléen)
+# Marquer un objet comme "désactivé" (classe Quasar "disabled" + attribut booléen)
 def disable(object):
     object.classes("disabled")
     object.enabled = False
