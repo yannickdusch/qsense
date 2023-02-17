@@ -15,8 +15,9 @@ ref = '32816,32817,32562,17971'  # Values returned by the sensor away from any s
 sens_x, sens_y, sens_z = 267, 267, 289  # Values of sensitivity (in LSB/mT) given by the MV2 datasheet (p. 16)
 MV2sens = [sens_x, sens_y, sens_z]  # Converts pin values to mT (for ±100 mT, the ADC saturates at a field roughly 20% larger than the range so : 0 <=> ~ -120mT | 65535 <=> ~ +120 mT)
 #alpha = m.pi/4  # Angle between the axis of the sensor and those of the electromagnet
-alpha = -m.pi/2  # Angle between the axis of the sensor and those of the antenna
+alpha = -m.pi/2 # Angle between the axis of the sensor and those of the antenna
 start = [0,0,0]  # Set origin
+lim = 50 # Axes limit on plots
 
 def RawToField(MV2data) :  # Converts pin values to mT by calculating the difference with ref values and dividing with MV2range
     data0 = ref.split(',')
@@ -55,6 +56,7 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
     
     def __init__(self, port = 'COM3', multi = False) :  # 'multi = True' activates the multiplotting (3D and 2D spherical angles)
         self.multi = multi
+        self.lim = lim
         self.ser = serial.Serial()
         self.ser.port = 'COM3'
         self.ser.baudrate = 115200
@@ -65,12 +67,12 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
             self.ax1 = plt.subplot2grid((3, 2), (0, 0), colspan=2, rowspan=2, projection='3d')
             self.ax2 = plt.subplot2grid((3, 2), (2, 0), polar = True)
             self.ax3 = plt.subplot2grid((3, 2), (2, 1), polar = True)
-            self.ax1.set_xlim([-50,50])
-            self.ax1.set_ylim([-50,50])
-            self.ax1.set_zlim([-50,50])
-            self.ax2.set_rlim([0,50])
+            self.ax1.set_xlim([-self.lim,self.lim])
+            self.ax1.set_ylim([-self.lim,self.lim])
+            self.ax1.set_zlim([-self.lim,self.lim])
+            self.ax2.set_rlim([0,self.lim])
             self.ax2.set_theta_zero_location("E")
-            self.ax3.set_rlim([0,50])
+            self.ax3.set_rlim([0,self.lim])
             self.ax3.set_thetalim([0,m.pi])
             self.ax3.set_theta_zero_location("N")  # Put 0° on the right
             self.ax3.set_theta_direction(-1)  # Set clockwise direction
@@ -80,9 +82,9 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
         else :
             self.fig = plt.figure(figsize = (10,10))
             self.ax = plt.axes(projection = '3d')
-            self.ax.set_xlim([-50,50])
-            self.ax.set_ylim([-50,50])
-            self.ax.set_zlim([-50,50])
+            self.ax.set_xlim([-self.lim,self.lim])
+            self.ax.set_ylim([-self.lim,self.lim])
+            self.ax.set_zlim([-self.lim,self.lim])
             self.ax.quiver(start[0],start[1],start[2],10,0,0,color = 'b')  # X axis (colored version : R)
             self.ax.quiver(start[0],start[1],start[2],0,10,0,color = 'k')  # Y axis (colored version : G)
             self.ax.quiver(start[0],start[1],start[2],0,0,10,color = 'k')  # Z axis (colored version : B)
@@ -91,9 +93,9 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
     
     def MF3Dplot(self, Bmoy) :  # Plots only the 3D field (higher frame rate)
         self.ax.cla()  # Clear the content already plotted without closing the figure (NB : plt.clf() clears the figure without closing the window)
-        self.ax.set_xlim([-50,50])
-        self.ax.set_ylim([-50,50])
-        self.ax.set_zlim([-50,50])
+        self.ax.set_xlim([-self.lim,self.lim])
+        self.ax.set_ylim([-self.lim,self.lim])
+        self.ax.set_zlim([-self.lim,self.lim])
         self.ax.set_title("3D Magnetic Field : B = "+str(self.B)+" mT | θ = "+str(self.theta)+"π | φ = "+str(self.phi)+"π")
         self.ax.quiver(start[0],start[1],start[2],10,0,0,color = 'b')
         self.ax.quiver(start[0],start[1],start[2],0,10,0,color = 'k')
@@ -106,12 +108,12 @@ class MF3D :  # Real time 3D plot of the magnetic field vector
         self.ax1.cla()  # Clear axes for the 3D figure
         self.ax2.cla()  # Clear axes for the first 2D figure
         self.ax3.cla()  # Clear axes for the second 2D figure
-        self.ax1.set_xlim([-50,50])
-        self.ax1.set_ylim([-50,50])
-        self.ax1.set_zlim([-50,50])
-        self.ax2.set_rlim([0,50])
+        self.ax1.set_xlim([-self.lim,self.lim])
+        self.ax1.set_ylim([-self.lim,self.lim])
+        self.ax1.set_zlim([-self.lim,self.lim])
+        self.ax2.set_rlim([0,self.lim])
         self.ax2.set_theta_zero_location("E")
-        self.ax3.set_rlim([0,50])
+        self.ax3.set_rlim([0,self.lim])
         self.ax3.set_thetalim([0,m.pi])
         self.ax3.set_theta_zero_location("N")  # Put 0° on the right
         self.ax3.set_theta_direction(-1)  # Set clockwise direction
