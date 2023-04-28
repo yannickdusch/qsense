@@ -21,6 +21,7 @@
 # ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
 from ctypes import *
 from spinapi import *
 import numpy as np
@@ -91,6 +92,4 @@ def programSequence(channelBitMasks):
 	status = pb_close()
 	errorCatcher(status)
 	return instructionArray
-	
-	
 	
