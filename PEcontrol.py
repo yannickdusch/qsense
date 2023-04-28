@@ -22,6 +22,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Control for the PE11S3900 Pasternack USB synthetizer
+
 import visa
 import sys
 # Frequency unit multiplier definitions
@@ -30,11 +32,10 @@ kHz =1e3
 MHz=1e6
 GHz=1e9
 
-
 unicode = lambda s: str(s)
 
 ##-------------------- Function definitions--------------------
-def initSRS(GPIBaddr,modelName):
+def initPE(GPIBaddr,modelName):
 	#initSRS: opens a GPIB communication channel with the SRS.
 	#		   arguments: - GPIBaddr: int describing GPIB address of SRS. For model SG384, the factory default is 27.
 	#					  - modelName: string describing SRS model. e.g.'SG384'
