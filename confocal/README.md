@@ -1,0 +1,3 @@
+The nanomax subfolder contains for now multiple script to test the communication between python and the nanomax including
+- `list_devices.py` that scan for visa and serial devices
+- `get_kinesis_parameters.py` that return a list of information concerning the k-cube driver if the communication succeed (the program takes in argument either the serial number of the controller or the communication port in linux)
