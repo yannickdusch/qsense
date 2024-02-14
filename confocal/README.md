@@ -1,3 +1,5 @@
-The nanomax subfolder contains for now multiple script to test the communication between python and the nanomax including
-- `list_devices.py` that scan for visa and serial devices
-- `get_kinesis_parameters.py` that return a list of information concerning the k-cube driver if the communication succeed (the program takes in argument either the serial number of the controller or the communication port in linux)
+The nanomax_control_examples subfolder contains multiple examples to test communication between python and KSG|KPZ101 module, and to control nanomax.
+The python package `apt_interface` is available [here](https://github.com/benoitlx/APT-interface) with instruction to install it.
+
+The folder contains:
+- `identify_devices.py` that scan for KSG and KPZ with serial "29501986" and "59000407"
