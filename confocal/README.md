@@ -7,3 +7,4 @@ The folder contains:
 - `ksg101x_test.py` that permanently retrieve the value given by the gauge of x axis
 - `closed_loop_prompt.py` that make KPZ and KSG work together to control precisly the position of the stage, an input of the position will be asked
 - `simulation.py` that generate an animation of the moving stage given a certain configuration using 3D plot from matplotlib
+- `follow_configured_path.py` that send data to KPZ in order to follow a list of preconstructed coordinates
