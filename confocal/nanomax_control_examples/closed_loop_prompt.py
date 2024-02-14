@@ -2,7 +2,7 @@ from apt_interface.KSG101 import KSG101
 from apt_interface.KPZ101 import KPZ101
 from time import sleep
 
-with KSG101() as ksg, KPZ101() as kpz:
+with KSG101("conf/config_KPZ.yaml") as ksg, KPZ101("conf/config_KSG.yaml") as kpz:
     print(ksg.conf)
     print(kpz.conf)
     ksg.get_io() 

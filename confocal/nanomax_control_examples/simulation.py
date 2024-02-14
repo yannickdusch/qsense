@@ -6,7 +6,7 @@ def mesure(*args, **kwargs):
 
     return 1
 
-s = Scan((None, None), config_file="tests/scan.yaml")
+s = Scan((None, None), config_file="conf/scan.yaml")
 
 print(s.conf)
 print(s.coords)

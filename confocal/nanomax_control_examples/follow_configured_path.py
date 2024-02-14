@@ -8,7 +8,7 @@ def mesure(*args, **kwargs):
     sleep(.01)
     return 1
 
-with KPZ101(config_file="x.yaml") as x, KPZ101(config_file="y.yaml") as y:
+with KPZ101(config_file="conf/x.yaml") as x, KPZ101(config_file="conf/y.yaml") as y:
     # La boucle fermée n'est pas utiliser ici, il aurait fallu instancier des ksg
     # pour les configurer sinon
 
